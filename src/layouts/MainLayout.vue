@@ -11,92 +11,102 @@
           @click="toggleLeftDrawer"
         />
 
-        <q-toolbar-title>
-          Quasar App
-        </q-toolbar-title>
+        <q-toolbar-title> WMS 倉儲系統 </q-toolbar-title>
 
         <div>Quasar v{{ $q.version }}</div>
       </q-toolbar>
     </q-header>
 
-    <q-drawer
-      v-model="leftDrawerOpen"
-      show-if-above
-      bordered
-    >
-      <q-list>
-        <q-item-label
-          header
+    <q-drawer v-model="leftDrawerOpen" show-if-above bordered>
+      <img
+        src="../assets/momo.png"
+        alt="WMS Map"
+        style="width: 100%; max-width: 300px; max-height: 100px"
+      />
+      <q-list padding>
+        <q-expansion-item
+          v-for="group in menu"
+          :key="group.label"
+          :icon="group.icon"
+          :label="group.label"
+          expand-separator
         >
-          Essential Links
-        </q-item-label>
-
-        <EssentialLink
-          v-for="link in linksList"
-          :key="link.title"
-          v-bind="link"
-        />
+          <q-item
+            v-for="item in group.children"
+            :key="item.label"
+            clickable
+            :to="item.to"
+            exact
+            active-class="text-primary"
+          >
+            <q-item-section avatar>
+              <q-icon :name="item.icon" />
+            </q-item-section>
+            <q-item-section>
+              <q-item-label>{{ item.label }}</q-item-label>
+            </q-item-section>
+          </q-item>
+        </q-expansion-item>
       </q-list>
     </q-drawer>
 
     <q-page-container>
-      <router-view />
+      <router-view v-slot="{ Component }">
+        <keep-alive :include="cache.cachedNames">
+          <component :is="Component" />
+        </keep-alive>
+      </router-view>
     </q-page-container>
   </q-layout>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
-import EssentialLink, { type EssentialLinkProps } from 'components/EssentialLink.vue';
+import { ref } from "vue";
+import EssentialLink, {
+  type EssentialLinkProps,
+} from "components/EssentialLink.vue";
+import { useKeepAliveCacheStore } from "src/stores/keepAliveCacheStore";
+const cache = useKeepAliveCacheStore();
 
-const linksList: EssentialLinkProps[] = [
+// menu definition used to render the left drawer via v-for
+const menu = [
   {
-    title: 'Docs',
-    caption: 'quasar.dev',
-    icon: 'school',
-    link: 'https://quasar.dev'
+    label: "User Management",
+    icon: "people",
+    children: [
+      { label: "Home", icon: "person", to: { path: "/" } },
+      { label: "Groups", icon: "groups", to: { path: "/barcode" } },
+      {
+        label: "ref基本類型的響應式數據",
+        icon: "shield",
+        to: { path: "/refpage" },
+      },
+      { label: "col", icon: "shield", to: { path: "/col" } },
+      { label: "ToRefs", icon: "shield", to: { path: "/toRefs" } },
+    ],
   },
   {
-    title: 'Github',
-    caption: 'github.com/quasarframework',
-    icon: 'code',
-    link: 'https://github.com/quasarframework'
+    label: "System",
+    icon: "settings",
+    children: [
+      { label: "Audit Logs", icon: "history", to: { path: "/system/audit" } },
+      { label: "Configuration", icon: "tune", to: { path: "/system/config" } },
+    ],
   },
   {
-    title: 'Discord Chat Channel',
-    caption: 'chat.quasar.dev',
-    icon: 'chat',
-    link: 'https://chat.quasar.dev'
+    label: "權限設定",
+    icon: "settings",
+    children: [
+      { label: "角色", icon: "history", to: { path: "/Roles" } },
+      { label: "使用者管理", icon: "tune", to: { path: "/User" } },
+      { label: "選單管理", icon: "tune", to: { path: "/Menu" } },
+    ],
   },
-  {
-    title: 'Forum',
-    caption: 'forum.quasar.dev',
-    icon: 'record_voice_over',
-    link: 'https://forum.quasar.dev'
-  },
-  {
-    title: 'Twitter',
-    caption: '@quasarframework',
-    icon: 'rss_feed',
-    link: 'https://twitter.quasar.dev'
-  },
-  {
-    title: 'Facebook',
-    caption: '@QuasarFramework',
-    icon: 'public',
-    link: 'https://facebook.quasar.dev'
-  },
-  {
-    title: 'Quasar Awesome',
-    caption: 'Community Quasar projects',
-    icon: 'favorite',
-    link: 'https://awesome.quasar.dev'
-  }
 ];
 
 const leftDrawerOpen = ref(false);
 
-function toggleLeftDrawer () {
+function toggleLeftDrawer() {
   leftDrawerOpen.value = !leftDrawerOpen.value;
 }
 </script>
