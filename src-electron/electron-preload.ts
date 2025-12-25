@@ -27,3 +27,12 @@
  *   }
  * }
  */
+
+import { contextBridge, ipcRenderer } from "electron";
+
+contextBridge.exposeInMainWorld("updater", {
+  onDownloaded: (cb: () => void) => ipcRenderer.on("updater:downloaded", cb),
+  onError: (cb: (_: any, msg: string) => void) =>
+    ipcRenderer.on("updater:error", cb),
+  quitAndInstall: () => ipcRenderer.invoke("updater:quitAndInstall"),
+});
